@@ -10,6 +10,7 @@
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
         <aws.sdk.version>2.25.5</aws.sdk.version>
+        <aws-xray-sdk.version>2.15.1</aws-xray-sdk.version>
     </properties>
 
     <dependencies>
@@ -41,6 +42,18 @@
             <artifactId>s3</artifactId>
             <version>${aws.sdk.version}</version>
         </dependency>
+
+        <dependency>
+            <groupId>com.amazonaws</groupId>
+            <artifactId>aws-xray-recorder-sdk-core</artifactId>
+            <version>${aws-xray-sdk.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.amazonaws</groupId>
+            <artifactId>aws-xray-recorder-sdk-aws-sdk-v2</artifactId>
+            <version>${aws-xray-sdk.version}</version>
+        </dependency>
+
 
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>

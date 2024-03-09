@@ -4,11 +4,13 @@ import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
+import com.amazonaws.xray.interceptors.TracingInterceptor;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.amazon.awssdk.core.ResponseInputStream;
+import software.amazon.awssdk.core.client.config.ClientOverrideConfiguration;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
@@ -38,10 +40,19 @@ import java.util.UUID;
  */
 public class SayMyNameHandler implements RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
 
-    private static final PollyClient pollyClient = PollyClient.create();
-    private static final S3Client s3Client = S3Client.create();
+    private static final ClientOverrideConfiguration xrayTracingHandler =  ClientOverrideConfiguration.builder()
+            .addExecutionInterceptor(new TracingInterceptor())
+            .build();
+    private static final PollyClient pollyClient = PollyClient.builder()
+            .overrideConfiguration(xrayTracingHandler)
+            .build();
+    private static final S3Client s3Client = S3Client.builder()
+            .overrideConfiguration(xrayTracingHandler)
+            .build();
     private static final S3Presigner s3Presigner = S3Presigner.create();
-    private static final DynamoDbClient dynamoDbClient = DynamoDbClient.create();
+    private static final DynamoDbClient dynamoDbClient = DynamoDbClient.builder()
+            .overrideConfiguration(xrayTracingHandler)
+            .build();
     private static final ObjectMapper objectMapper = new ObjectMapper();
     private static final Logger logger = LoggerFactory.getLogger(SayMyNameHandler.class);
     public static final String BUCKET_NAME = "public-say-my-name";
