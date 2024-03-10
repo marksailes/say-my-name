@@ -33,6 +33,7 @@ import software.amazon.awssdk.services.s3.presigner.model.PresignedGetObjectRequ
 import java.io.IOException;
 import java.time.Duration;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 
 /**
@@ -53,21 +54,23 @@ public class SayMyNameHandler implements RequestHandler<APIGatewayProxyRequestEv
     private static final DynamoDbClient dynamoDbClient = DynamoDbClient.builder()
             .overrideConfiguration(xrayTracingHandler)
             .build();
-    private static final ObjectMapper objectMapper = new ObjectMapper();
+
     private static final Logger logger = LoggerFactory.getLogger(SayMyNameHandler.class);
     public static final String BUCKET_NAME = "public-say-my-name";
 
-    public APIGatewayProxyResponseEvent handleRequest(final APIGatewayProxyRequestEvent input, final Context context) {
-        NameRequest nameRequest;
+    public APIGatewayProxyResponseEvent handleRequest(final APIGatewayProxyRequestEvent request, final Context context) {
         String name;
-        
-        try {
-            nameRequest = objectMapper.readValue(input.getBody(), NameRequest.class);
-            name = nameRequest.name();
+
+        if (Objects.nonNull(request.getQueryStringParameters()) &&
+        Objects.nonNull(request.getQueryStringParameters().get("name")) ) {
+            name = request.getQueryStringParameters().get("name");
             logger.info("Received request to pronounce: {}", name);
-        } catch (JsonProcessingException e) {
-            logger.error(e.getMessage());
-            return new APIGatewayProxyResponseEvent().withStatusCode(400);
+        } else {
+            logger.error("No name in query string params.");
+            logger.error(request.toString());
+            return new APIGatewayProxyResponseEvent()
+                    .withStatusCode(400)
+                    .withBody("{\"message\":\"No value in 'name' query string\"}");
         }
 
         if (!NameRequestValidator.isValid(name)) {

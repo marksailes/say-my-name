@@ -1,4 +1,30 @@
-# say-my-name
+# Say My Name
+
+Never be unsure how to pronounce a name again.
+
+## Architecture
+
+
+
+## Costs
+
+### Amazon API Gateway 
+
+ApiGatewayRequest
+$3.50/million requests - first 333 million requests/month
+
+### Amazon Polly 
+
+EU-SynthesizeSpeechNeural-Characters
+$16 per million characters for SynthesizeSpeechNeural-Characters in EU (Ireland)
+
+### DynamoDB 
+
+PayPerRequestThroughput
+$1.4135 per million write request units (EU (Ireland))
+
+Storage
+no worth estimating
 
 ### Todo
 

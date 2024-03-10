@@ -4,6 +4,8 @@ import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
 import org.junit.Test;
 
+import java.util.Map;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -13,12 +15,7 @@ public class SayMyNameHandlerTest {
     @Test
     public void test() {
         APIGatewayProxyRequestEvent request = new APIGatewayProxyRequestEvent();
-        String nameRequest = """
-                {
-                    "name": "Mark Sailes"
-                }
-                """;
-        request.setBody(nameRequest);
+        request.setQueryStringParameters(Map.of("name", "Mark Sailes"));
         APIGatewayProxyResponseEvent response = sayMyNameHandler.handleRequest(request, null);
 
         assertEquals(200, (int) response.getStatusCode());
@@ -27,13 +24,10 @@ public class SayMyNameHandlerTest {
 
     @Test
     public void clientErrorReturnedWhenNameTooLong() {
+        String nameTooLong = "asdafagsdfsfasdewegsdvsdfgthgdgdfgsdfsdfsdfsdgsgfsgsdgsgsd asdfadqweqwafdzgfhhfgsdfsfesadafrrsfdsfsdfsdfsdf";
         APIGatewayProxyRequestEvent request = new APIGatewayProxyRequestEvent();
-        String nameRequest = """
-                {
-                    "name": "asdafagsdfsfasdewegsdvsdfgthgdgdfgsdfsdfsdfsdgsgfsgsdgsgsd asdfadqweqwafdzgfhhfgsdfsfesadafrrsfdsfsdfsdfsdf"
-                }
-                """;
-        request.setBody(nameRequest);
+        request.setQueryStringParameters(Map.of("name", nameTooLong));
+
         APIGatewayProxyResponseEvent response = sayMyNameHandler.handleRequest(request, null);
 
         assertEquals(400, (int) response.getStatusCode());
