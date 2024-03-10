@@ -1,0 +1,15 @@
+<html>
+    <head>
+        <title>Say My Name</title>
+        <script src="htmx.min.js"></script>
+    </head>
+    <body>
+        <form hx-get="https://say-my-name-api.sailes.me" hx-target="this" hx-swap="outerHTML">
+            <div>
+                <label>Name</label>
+                <input type="text" name="name" value="firstname lastname">
+            </div>
+            <button class="btn">Hear it!</button>
+        </form>
+    </body>
+</html>

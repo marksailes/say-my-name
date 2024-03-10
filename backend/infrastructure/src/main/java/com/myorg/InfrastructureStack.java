@@ -2,6 +2,8 @@ package com.myorg;
 
 import net.sailes.saymyname.SayMyNameHandler;
 import software.amazon.awscdk.*;
+import software.amazon.awscdk.services.apigateway.Cors;
+import software.amazon.awscdk.services.apigateway.CorsOptions;
 import software.amazon.awscdk.services.apigateway.LambdaRestApi;
 import software.amazon.awscdk.services.dynamodb.ITable;
 import software.amazon.awscdk.services.dynamodb.Table;
@@ -48,6 +50,11 @@ public class InfrastructureStack extends Stack {
         LambdaRestApi restApi = LambdaRestApi.Builder.create(this, "say-my-name-api")
                 .restApiName("Say-My-Name-API")
                 .handler(sayMyNameFunction)
+                .defaultCorsPreflightOptions(CorsOptions.builder()
+                        .allowHeaders(List.of("*"))
+                        .allowOrigins(Cors.ALL_ORIGINS)
+                        .allowMethods(Cors.ALL_METHODS)
+                        .build())
                 .build();
 
         new CfnOutput(this, "API URL", CfnOutputProps.builder()

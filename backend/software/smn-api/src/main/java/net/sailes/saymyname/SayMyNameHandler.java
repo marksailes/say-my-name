@@ -5,8 +5,6 @@ import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
 import com.amazonaws.xray.interceptors.TracingInterceptor;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.amazon.awssdk.core.ResponseInputStream;
@@ -31,6 +29,8 @@ import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignReques
 import software.amazon.awssdk.services.s3.presigner.model.PresignedGetObjectRequest;
 
 import java.io.IOException;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.Map;
 import java.util.Objects;
@@ -41,7 +41,7 @@ import java.util.UUID;
  */
 public class SayMyNameHandler implements RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
 
-    private static final ClientOverrideConfiguration xrayTracingHandler =  ClientOverrideConfiguration.builder()
+    private static final ClientOverrideConfiguration xrayTracingHandler = ClientOverrideConfiguration.builder()
             .addExecutionInterceptor(new TracingInterceptor())
             .build();
     private static final PollyClient pollyClient = PollyClient.builder()
@@ -57,20 +57,29 @@ public class SayMyNameHandler implements RequestHandler<APIGatewayProxyRequestEv
 
     private static final Logger logger = LoggerFactory.getLogger(SayMyNameHandler.class);
     public static final String BUCKET_NAME = "public-say-my-name";
+    public static final Map<String, String> CORS = Map.of(
+            "Access-Control-Allow-Headers", "*",
+            "Access-Control-Allow-Methods", "*",
+            "Access-Control-Allow-Origin", "*");
 
     public APIGatewayProxyResponseEvent handleRequest(final APIGatewayProxyRequestEvent request, final Context context) {
         String name;
 
         if (Objects.nonNull(request.getQueryStringParameters()) &&
-        Objects.nonNull(request.getQueryStringParameters().get("name")) ) {
-            name = request.getQueryStringParameters().get("name");
-            logger.info("Received request to pronounce: {}", name);
+                Objects.nonNull(request.getQueryStringParameters().get("name"))) {
+            String encodedName = request.getQueryStringParameters().get("name");
+            name = URLDecoder.decode(encodedName, StandardCharsets.UTF_8);
+            logger.info("Received request to pronounce: {}", encodedName);
         } else {
             logger.error("No name in query string params.");
             logger.error(request.toString());
             return new APIGatewayProxyResponseEvent()
                     .withStatusCode(400)
-                    .withBody("{\"message\":\"No value in 'name' query string\"}");
+                    .withBody("""
+                            {
+                                "message":"No value in 'name' query string"
+                            }
+                            """);
         }
 
         if (!NameRequestValidator.isValid(name)) {
@@ -91,10 +100,15 @@ public class SayMyNameHandler implements RequestHandler<APIGatewayProxyRequestEv
             String presignedUrl = getPresignedUrl(s3Key);
             storeItemInDynamoDb(name, enGb, s3Key);
 
-            String body = "{ \"location\": \"" + presignedUrl + "\" }";
+            String audioPlayerHtml = """
+                    <audio controls>
+                      <source src="%s" type="audio/mpeg">
+                    </audio>
+                    """.formatted(presignedUrl);
             return new APIGatewayProxyResponseEvent()
                     .withStatusCode(200)
-                    .withBody(body);
+                    .withHeaders(CORS)
+                    .withBody(audioPlayerHtml);
         } catch (IOException e) {
             logger.error(e.getMessage());
             return new APIGatewayProxyResponseEvent().withStatusCode(400);

@@ -15,7 +15,7 @@ public class SayMyNameHandlerTest {
     @Test
     public void test() {
         APIGatewayProxyRequestEvent request = new APIGatewayProxyRequestEvent();
-        request.setQueryStringParameters(Map.of("name", "Mark Sailes"));
+        request.setQueryStringParameters(Map.of("name", "Mark%20Sailes"));
         APIGatewayProxyResponseEvent response = sayMyNameHandler.handleRequest(request, null);
 
         assertEquals(200, (int) response.getStatusCode());
