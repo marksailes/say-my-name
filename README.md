@@ -4,7 +4,7 @@ Never be unsure how to pronounce a name again.
 
 ## Architecture
 
-
+![High level architecture design](/docs/say-me-name-hld.png)
 
 ## Costs
 
