@@ -8,28 +8,16 @@ Never be unsure how to pronounce a name again.
 
 ## Costs
 
-### Amazon API Gateway 
-
-ApiGatewayRequest
-$3.50/million requests - first 333 million requests/month
-
-### Amazon Polly 
-
-EU-SynthesizeSpeechNeural-Characters
-$16 per million characters for SynthesizeSpeechNeural-Characters in EU (Ireland)
-
-### DynamoDB 
-
-PayPerRequestThroughput
-$1.4135 per million write request units (EU (Ireland))
-
-Storage
-no worth estimating
+| Service            | Service API                          | Cost                                                                         | Cost per request |
+|--------------------|--------------------------------------|------------------------------------------------------------------------------|------------------|
+| Amazon API Gateway | ApiGatewayRequest                    | $3.50/million requests - first 333 million requests/month                    |                  |
+| Amazon Polly       | EU-SynthesizeSpeechNeural-Characters | $16/million characters for SynthesizeSpeechNeural-Characters in EU (Ireland) |                  |
+| Amazon DynamoDB    | PayPerRequestThroughput              | $1.4135/million write request units (EU (Ireland))                           |                  |  
 
 ### Todo
 
 - [x] Add x-ray segments for services
 - [x] Make a front-end
-- [ ] Rate limiting
 - [ ] Expose trace to front-end
 - [ ] Add cache-aside strategy
+- [ ] Rate limiting
